@@ -4,10 +4,10 @@
     <el-form ref="form" :model="form" status-icon :rules="rules" label-width="80px">
       <img class="erha" src="../assets/erha.jpg" alt>
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="form.username" placeholder="请输入用户名"></el-input>
+        <el-input  @keyup.native.enter="submitForm('form')" v-model="form.username" placeholder="请输入用户名"></el-input>
       </el-form-item>
       <el-form-item label="密码" prop="password">
-        <el-input type="password" v-model="form.password" placeholder="请输入密码"></el-input>
+        <el-input  @keyup.native.enter="submitForm('form')" type="password" v-model="form.password" placeholder="请输入密码"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="submitForm('form')" type="primary">登录</el-button>
@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from 'axios'
 
 export default {
   data () {
@@ -59,6 +59,7 @@ export default {
   },
   methods: {
     submitForm (form) {
+      console.log('1111')
       this.$refs[form].validate(valid => {
         if (valid) {
           axios({
@@ -66,8 +67,10 @@ export default {
             url: 'http://localhost:8888/api/private/v1/login',
             data: this.form
           }).then(res => {
-            const { meta } = res.data
+            console.log(res)
+            const { meta, data } = res.data
             if (meta.status === 200) {
+              localStorage.setItem('token', data.token)
               this.$message({
                 message: meta.msg,
                 type: 'success'
