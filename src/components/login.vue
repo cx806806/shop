@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 
 export default {
   data () {
@@ -58,34 +57,23 @@ export default {
     }
   },
   methods: {
-    submitForm (form) {
-      console.log('1111')
-      this.$refs[form].validate(valid => {
-        if (valid) {
-          axios({
-            method: 'post',
-            url: 'http://localhost:8888/api/private/v1/login',
-            data: this.form
-          }).then(res => {
-            console.log(res)
-            const { meta, data } = res.data
-            if (meta.status === 200) {
-              localStorage.setItem('token', data.token)
-              this.$message({
-                message: meta.msg,
-                type: 'success'
-              })
-              this.$router.push('/index')
-            } else {
-              console.log(meta.msg)
-              this.$message.error(meta.msg)
-            }
+    async submitForm (form) {
+      try {
+        await this.$refs[form].validate()
+        const { data, meta } = await this.$axios.post('login', this.form)
+        if (meta.status === 200) {
+          localStorage.setItem('token', data.token)
+          this.$message({
+            message: meta.msg,
+            type: 'success'
           })
+          this.$router.push('/index')
         } else {
-          console.log('error submit!!')
-          return false
+          this.$message.error(meta.msg)
         }
-      })
+      } catch (e) {
+        console.log(e)
+      }
     },
     resetForm (form) {
       this.$refs[form].resetFields()
