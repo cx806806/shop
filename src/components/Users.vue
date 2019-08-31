@@ -42,7 +42,7 @@
         <el-table-column
           label="操作">
           <template v-slot:default="obj">
-          <el-button plain size="small" type="primary" icon="el-icon-edit"></el-button>
+          <el-button @click="show(obj.row)" plain size="small" type="primary" icon="el-icon-edit"></el-button>
           <el-button @click="open(obj.row)" plain size="small" type="danger" icon="el-icon-delete"></el-button>
           <el-button plain size="small" type="success" icon="el-icon-check">分配角色</el-button>
           </template>
@@ -85,6 +85,26 @@
         </span>
   </el-dialog>
 
+  <el-dialog
+    title="提示"
+    :visible.sync="dialogVisible1"
+    width="40%">
+        <el-form ref="form1" :model="form1" :rules="rules" label-width="80px">
+          <el-form-item label="用户名">
+            <el-tag type="info">{{ form1.username }}</el-tag>
+          </el-form-item>
+          <el-form-item label="邮箱" prop='email'>
+            <el-input v-model="form1.email"></el-input>
+          </el-form-item>
+          <el-form-item label="手机" prop='mobile'>
+            <el-input v-model="form1.mobile"></el-input>
+          </el-form-item>
+        </el-form>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible1 = false">取 消</el-button>
+      <el-button type="primary" @click="revuser('form1')">确 定</el-button>
+    </span>
+  </el-dialog>
   </div>
 
 </template>
@@ -103,6 +123,12 @@ export default {
       form: {
         username: '',
         password: '',
+        email: '',
+        mobile: ''
+      },
+      form1: {
+        id: '',
+        username: '',
         email: '',
         mobile: ''
       },
@@ -213,6 +239,33 @@ export default {
           type: 'info',
           message: '已取消删除'
         })
+      }
+    },
+    show (row) {
+      this.dialogVisible1 = true
+      const { username, email, mobile, id } = row
+      this.form1 = {
+        id,
+        username,
+        email,
+        mobile
+      }
+    },
+    async revuser (form1) {
+      try {
+        await this.$refs[form1].validate()
+        const { meta } = await this.$axios.put(`users/${this.form1.id}`, {
+          email: this.form1.email,
+          mobile: this.form1.mobile
+        })
+        if (meta.status === 200) {
+          this.$message.success(meta.msg)
+          this.dialogVisible1 = false
+        } else {
+          this.$message.error(meta.msg)
+        }
+      } catch (error) {
+        console.log(error)
       }
     }
   }

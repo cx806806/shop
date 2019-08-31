@@ -20,6 +20,11 @@ axios.interceptors.request.use(function (config) {
 
 axios.interceptors.response.use(function (response) {
   response = response.data
+  if (response.meta.status === 401) {
+    localStorage.removeItem('token')
+    response.meta.msg = 'token过期，请重新登录'
+    router.push('/login')
+  }
 
   return response
 }, function (error) {
